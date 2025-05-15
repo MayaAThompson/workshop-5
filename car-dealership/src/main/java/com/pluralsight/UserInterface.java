@@ -33,6 +33,7 @@ public class UserInterface {
                 default -> System.out.println("Please select one of the available options.");
             }
         }
+        save();
     }
 
     public void processGetByPriceRequest() {
@@ -81,7 +82,7 @@ public class UserInterface {
         String maxFilterString = IOUtils.messageAndResponse("Maximum year: ");
         maxFilter = tryParseInt(maxFilterString, maxFilter);
 
-        ArrayList<Vehicle> yearFilteredVehicles = dealership.getVehiclesByPrice(minFilter, maxFilter);
+        ArrayList<Vehicle> yearFilteredVehicles = dealership.getVehiclesByYear(minFilter, maxFilter);
         if (yearFilteredVehicles.isEmpty()) {
             System.out.println("No vehicles found. Try expanding your search to find one of our great deals!");
         }
@@ -93,23 +94,75 @@ public class UserInterface {
     }
 
     public void processGetByColorRequest() {
+        String colorFilter = IOUtils.messageAndResponse("Color: ");
 
+        ArrayList<Vehicle> colorFilteredVehicles = dealership.getVehiclesByColor(colorFilter);
+
+        if (colorFilteredVehicles.isEmpty()) {
+            System.out.println("No vehicles found. Try expanding your search to find one of our great deals!");
+        }
+        else {
+            for (Vehicle vehicle : colorFilteredVehicles) {
+                System.out.println(vehicle.toConsoleOutString());
+            }
+        }
     }
 
     public void processGetByMileageRequest() {
+        int minFilter = 0;
+        int maxFilter = 9999999;
 
+        String minFilterString = IOUtils.messageAndResponse("Minimum mileage: ");
+        minFilter = tryParseInt(minFilterString, minFilter);
+
+        String maxFilterString = IOUtils.messageAndResponse("Maximum mileage: ");
+        maxFilter = tryParseInt(maxFilterString, maxFilter);
+
+        ArrayList<Vehicle> mileageFilteredVehicles = dealership.getVehiclesByMileage(minFilter, maxFilter);
+        if (mileageFilteredVehicles.isEmpty()) {
+            System.out.println("No vehicles found. Try expanding your search to find one of our great deals!");
+        }
+        else {
+            for (Vehicle vehicle : mileageFilteredVehicles) {
+                System.out.println(vehicle.toConsoleOutString() + "\n");
+            }
+        }
     }
 
     public void processGetByVehicleTypeRequest() {
+        String typeFilter = IOUtils.messageAndResponse("Vehicle Type: ");
 
+        ArrayList<Vehicle> colorFilteredVehicles = dealership.getVehiclesByType(typeFilter);
+
+        if (colorFilteredVehicles.isEmpty()) {
+            System.out.println("No vehicles found. Try expanding your search to find one of our great deals!");
+        }
+        else {
+            for (Vehicle vehicle : colorFilteredVehicles) {
+                System.out.println(vehicle.toConsoleOutString());
+            }
+        }
     }
 
     public void processGetAllVehiclesRequest() {
-
+        ArrayList<Vehicle> allVehicles = dealership.getAllVehicles();
+        for (Vehicle vehicle : allVehicles) {
+            System.out.println(vehicle.toConsoleOutString());
+        }
     }
 
     public void processAddVehicleRequest() {
+        int vehicleId = IOUtils.messageAndResponseInt("Vehicle ID Number: ");
+        int year = IOUtils.messageAndResponseInt("Vehicle year: ");
+        String make = IOUtils.messageAndResponse("Vehicle make: ");
+        String model = IOUtils.messageAndResponse("Vehicle model: ");
+        String type = IOUtils.messageAndResponse("Vehicle type: ");
+        String color = IOUtils.messageAndResponse("Vehicle color: ");
+        int odometer = IOUtils.messageAndResponseInt("Vehicle odometer reading: ");
+        double price = IOUtils.messageAndResponseDouble("Vehicle price: $");
 
+        Vehicle vehicle = new Vehicle(vehicleId, year, make, model, type, color, odometer, price);
+        dealership.addVehicle(vehicle);
     }
 
     public void processRemoveVehicleRequest() {
@@ -121,20 +174,27 @@ public class UserInterface {
         this.dealership = initDealer.getDealership();
     }
 
-    private String menuString() {
-        return "Welcome to " + this.dealership.getName() + "!" +
-                "\n\nWhat would you like to do?\n" +
-                "\n1) View all vehicles" +
-                "\n2) Sort vehicles by price" +
-                "\n3) Sort by make and model" +
-                "\n4) Sort by year" +
-                "\n5) Sort by color" +
-                "\n6) Sort by mileage" +
-                "\n7) Sort by vehicle type" +
-                "\n8) Add new vehicle" +
-                "\n9) Remove a vehicle" +
-                "\n0) Exit";
+    private void save() {
+        DealershipFileManager saveDealer = new DealershipFileManager();
+        saveDealer.saveDealership(dealership);
+    }
 
+    private String menuString() {
+        return String.format("""
+                Welcome to %s!
+                What would you like to do?
+                1) View all vehicles
+                2) Sort vehicles by price
+                3) Sort vehicles by make and model
+                3) Sort vehicles by make and model
+                4) Sort vehicles by year
+                5) Sort vehicles by color
+                6) Sort vehicles by mileage
+                7) Sort vehicles by type
+                8) Add a new vehicle
+                9) Remove a vehicle
+                10) Sell/Lease a vehicle
+                0) Exit""", this.dealership.getName());
     }
 
     private static double tryParseDouble(String filterString, double filterDouble) {
